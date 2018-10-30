@@ -23,6 +23,8 @@ let elementFactory = (el, content, attributes, ...children) => {
 
 // 2) Original call to OMDB
 
+
+// This object contains all of the methods for interacting with the OMDB API.
 const omdbAPI = {
   //Get search from API, returns basic info
   getMovies(keyword) {
@@ -50,13 +52,19 @@ const omdbAPI = {
   }
 }
 
-function addEventListeners(elementQuery, eventType, callbackFn) {
-  document.querySelectorAll(elementQuery).forEach(element => element.addEventListener(eventType, event => callbackFn(event)))
+const localDB = {
+  addMovieToDB(id) {
+    let movieObject = {
+      movieId: id
+    }
+    console.log("Movie Object:", movieObject)
+  }
 }
 
-function addMovieToDB(event) {
-  console.log(event.target.id);
-}
+// function addEventListeners(elementQuery, eventType, callbackFn) {
+//   document.querySelectorAll(elementQuery).forEach(element => element.addEventListener(eventType, event => callbackFn))
+// }
+
 
 // 4) Add final results to DOM
 function displayMovies(movies) {
@@ -90,7 +98,9 @@ function displayMovies(movies) {
   // Insert the list items into the DOM as children of the ul in index.html
   movieList.appendChild(fragment)
   //Add Event Listeners to Buttons
-  addEventListeners(".add-button", "click", addMovieToDB);
+  document.querySelectorAll(".add-button").forEach(button => {
+    button.addEventListener("click", () => {localDB.addMovieToDB(button.id)});
+  })
 }
 
 
