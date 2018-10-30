@@ -64,14 +64,9 @@ const localDB = {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(movieObject)
-    })
+    }).then(alert("Movie was added to your database!"))
   }
 }
-
-// function addEventListeners(elementQuery, eventType, callbackFn) {
-//   document.querySelectorAll(elementQuery).forEach(element => element.addEventListener(eventType, event => callbackFn))
-// }
-
 
 // 4) Add final results to DOM
 function displayMovies(movies) {
