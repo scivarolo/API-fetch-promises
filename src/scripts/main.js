@@ -53,11 +53,18 @@ const omdbAPI = {
 }
 
 const localDB = {
+  url: "http://localhost:8088/movies",
   addMovieToDB(id) {
     let movieObject = {
       movieId: id
     }
-    console.log("Movie Object:", movieObject)
+    fetch(this.url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(movieObject)
+    })
   }
 }
 
