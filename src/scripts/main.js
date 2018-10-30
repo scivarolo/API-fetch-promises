@@ -54,9 +54,11 @@ const omdbAPI = {
 
 const localDB = {
   url: "http://localhost:8088/movies",
-  addMovieToDB(id) {
+  addMovieToDB(id, watched, owned) {
     let movieObject = {
-      id: id
+      id: id,
+      watched: watched,
+      owned: owned
     }
     fetch(this.url, {
       method: "POST",
@@ -65,6 +67,20 @@ const localDB = {
       },
       body: JSON.stringify(movieObject)
     }).then(alert("Movie was added to your database!"))
+  },
+  patchMovieInDB(id, watched, owned) {
+    let patchUrl = `${this.url}/${id}`
+    let patchObj = {
+      watched: watched,
+      owned: owned
+    }
+    fetch(patchUrl, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(patchObj)
+    }).then(alert("Movie was updated in database!"))
   },
   fetchMovies() {
     return fetch(this.url).then(response => response.json())
@@ -163,12 +179,14 @@ function askMovieOptions(id) {
   saveButton.addEventListener("click", () => {
     localDB.checkForMovie(id)
     .then(movieInDB => {
+      let watched = document.querySelector(`#watched-${id}`).checked
+      let owned = document.querySelector(`#owned-${id}`).checked
       if(movieInDB) {
         //we want to PATCH
-        console.log("we would do a patch here")
+        localDB.patchMovieInDB(id, watched, owned)
       } else {
         //we want to POST
-        localDB.addMovieToDB(id)
+        localDB.addMovieToDB(id, watched, owned)
       }
     })
   })
