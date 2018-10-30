@@ -68,6 +68,11 @@ const localDB = {
   }
 }
 
+//Function to clear an HTML element
+function clearEl(element) {
+  element.innerHTML = ""
+}
+
 // 4) Add final results to DOM
 function displayMovies(movies) {
   let movieList = document.querySelector("#movielist")
@@ -98,6 +103,7 @@ function displayMovies(movies) {
 
   })
   // Insert the list items into the DOM as children of the ul in index.html
+  clearEl(movieList)
   movieList.appendChild(fragment)
   //Add Event Listeners to Buttons
   document.querySelectorAll(".add-button").forEach(button => {
