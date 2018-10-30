@@ -56,7 +56,7 @@ const localDB = {
   url: "http://localhost:8088/movies",
   addMovieToDB(id) {
     let movieObject = {
-      movieId: id
+      id: id
     }
     fetch(this.url, {
       method: "POST",
@@ -68,6 +68,19 @@ const localDB = {
   },
   fetchMovies() {
     return fetch(this.url).then(response => response.json())
+  },
+  checkForMovie(id) {
+    let movieUrl = `${this.url}/${id}`
+    return fetch(movieUrl)
+      .then(response => {
+        if (response.ok) {
+          console.log("The movie is in the database", response)
+          return true
+        } else {
+          console.log("The movie is not in the database", response)
+          return false
+        }
+      })
   }
 }
 
@@ -125,7 +138,10 @@ function displayMovies(movies) {
   movieList.appendChild(fragment)
   //Add Event Listeners to Buttons
   document.querySelectorAll(".add-button").forEach(button => {
-    button.addEventListener("click", () => localDB.addMovieToDB(button.id));
+    //button.addEventListener("click", () => localDB.addMovieToDB(button.id));
+    button.addEventListener("click", (event) => {
+      event.target.parentNode.insertBefore(askMovieOptions(event.target.id), event.target.nextSibling);
+    })
   })
 }
 
@@ -135,6 +151,31 @@ document.querySelector("#movieBtn").addEventListener("click", () => {
     .then(movies => displayMovies(movies))
 })
 
+
+// When user tries to add movie to library, ask some questions
+function askMovieOptions(id) {
+  let movieOptionsFrag = document.createDocumentFragment();
+  let watched = elementFactory("input", null, {type: "checkbox", id: `watched-${id}`, name: "watched", value: "true"})
+  let wLabel = elementFactory("label", "I've watched this movie!", {for: `watched-${id}`})
+  let owned = elementFactory("input", null, {type: "checkbox", id: `owned-${id}`, name: "owned", value: "true"})
+  let oLabel = elementFactory("label", "I own this movie!", {for: `owned-${id}`})
+  let saveButton = elementFactory("button", "Save", {class: "add-with-options"});
+  saveButton.addEventListener("click", () => {
+    localDB.checkForMovie(id)
+    .then(movieInDB => {
+      if(movieInDB) {
+        //we want to PATCH
+        console.log("we would do a patch here")
+      } else {
+        //we want to POST
+        localDB.addMovieToDB(id)
+      }
+    })
+  })
+  let movieOptionsSection = elementFactory("section", null, {}, watched, wLabel, owned, oLabel, saveButton)
+  movieOptionsFrag.appendChild(movieOptionsSection)
+  return movieOptionsFrag
+}
 
 // STUDENT CHALLENGE
 // Handling adding a movie to movies collection
