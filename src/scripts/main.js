@@ -22,30 +22,40 @@ let elementFactory = (el, content, attributes, ...children) => {
 // *****************************************************************************************
 
 // 2) Original call to OMDB
-function getMovies(keyword) {
-  return fetch(`http://www.omdbapi.com/?apikey=b3bd2b6a&s=${keyword}&type=movie`)
-    .then(movies => movies.json())
-    .then(movies => {
-      console.log(movies)
-      moviePromises = []
-      movies.Search.forEach(movie => {
-        moviePromises.push(
-          getMovieDetails(movie.imdbID)
-        )
+
+const omdbAPI = {
+  //Get search from API, returns basic info
+  getMovies(keyword) {
+    return fetch(`http://www.omdbapi.com/?apikey=86c28be8&s=${keyword}&type=movie`)
+      .then(movies => movies.json())
+      .then(movies => {
+        console.log(movies)
+        moviePromises = []
+        movies.Search.forEach(movie => {
+          moviePromises.push(
+            this.getMovieDetails(movie.imdbID)
+          )
+        })
+        return Promise.all(moviePromises)
       })
-      return Promise.all(moviePromises)
-    })
-    .then(allMoviesDeets => {
-      console.log("all movies deets", allMoviesDeets);
-      return allMoviesDeets
-    })
-    .catch( error => console.log("Sumthin wint rong", error))
+      .then(allMoviesDeets => {
+        console.log("all movies deets", allMoviesDeets);
+        return allMoviesDeets
+      })
+  },
+  //Secondary call to OMDB for movie details with ID from getMovies
+  getMovieDetails(id) {
+    return fetch(`http://www.omdbapi.com/?apikey=86c28be8&i=${id}`)
+      .then(movie => movie.json())
+  }
 }
 
-// 3) Secondary call to OMDB for movie details
-function getMovieDetails(id) {
-  return fetch(`http://www.omdbapi.com/?apikey=b3bd2b6a&i=${id}`)
-    .then(movie => movie.json())
+function addEventListeners(elementQuery, eventType, callbackFn) {
+  document.querySelectorAll(elementQuery).forEach(element => element.addEventListener(eventType, event => callbackFn(event)))
+}
+
+function addMovieToDB(event) {
+  console.log(event.target.id);
 }
 
 // 4) Add final results to DOM
@@ -66,23 +76,27 @@ function displayMovies(movies) {
       id: null,
       class: "movieCast"
     })
+    let addButton = elementFactory("button", "Add to My Movies", {id: movie.imdbID, class: "add-button"})
     // Make a list item component composed of the h3 and p elements
     let movieListItem = elementFactory("li", null, {
       id: "movieItem",
       class: "movieItem"
-    }, title, poster, cast)
+    }, title, poster, cast, addButton)
 
     // Attach the new list item to the fragment
     fragment.appendChild(movieListItem)
+
   })
   // Insert the list items into the DOM as children of the ul in index.html
   movieList.appendChild(fragment)
+  //Add Event Listeners to Buttons
+  addEventListeners(".add-button", "click", addMovieToDB);
 }
 
 
 // 1) Handle the user's keyword search and append results to the DOM
 document.querySelector("#movieBtn").addEventListener("click", () => {
-  getMovies(document.querySelector("#movieSearch").value)
+  omdbAPI.getMovies(document.querySelector("#movieSearch").value)
     .then(movies => displayMovies(movies))
 })
 
