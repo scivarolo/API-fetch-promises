@@ -65,8 +65,26 @@ const localDB = {
       },
       body: JSON.stringify(movieObject)
     }).then(alert("Movie was added to your database!"))
+  },
+  fetchMovies() {
+    return fetch(this.url).then(response => response.json())
   }
 }
+
+// Load My Movies when button is clicked
+document.querySelector('#savedMovies').addEventListener("click", () => {
+  localDB.fetchMovies()
+    .then(movies => {
+      let movieRequests = []
+      movies.forEach(movie => {
+        movieRequests.push(
+          omdbAPI.getMovieDetails(movie.movieId)
+        )
+      })
+      return Promise.all(movieRequests)
+    })
+    .then(myMovies => displayMovies(myMovies))
+});
 
 //Function to clear an HTML element
 function clearEl(element) {
@@ -107,10 +125,9 @@ function displayMovies(movies) {
   movieList.appendChild(fragment)
   //Add Event Listeners to Buttons
   document.querySelectorAll(".add-button").forEach(button => {
-    button.addEventListener("click", () => {localDB.addMovieToDB(button.id)});
+    button.addEventListener("click", () => localDB.addMovieToDB(button.id));
   })
 }
-
 
 // 1) Handle the user's keyword search and append results to the DOM
 document.querySelector("#movieBtn").addEventListener("click", () => {
